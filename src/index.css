@@ -1,0 +1,29 @@
+.Heading img {
+  height: 40px;
+}
+
+.Heading .text-base {
+  font-size: 20px;
+  margin-left: 10px;
+  animation-name: fadeIn;
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+.Heading .text-base span {
+  font-weight: bold;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .Heading {
+    width: 100%;
+  }
+}

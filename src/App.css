@@ -4,5 +4,19 @@
   min-height: 100vh;
   display: flex;
   color: black;
-  background: url(../public/bg.jpg);
+  background: linear-gradient(to bottom, #0072ff, #00c6ff);
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(136, 136, 136, 0.281);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

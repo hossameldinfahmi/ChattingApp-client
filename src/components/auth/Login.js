@@ -6,6 +6,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useToast } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
+import { ChatState } from "../../Context/ChatProvider";
 
 const Login = () => {
   const [show, setShow] = useState(false);
@@ -14,14 +15,27 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { setUser } = ChatState();
 
   const history = useHistory();
 
   const submitHandler = async () => {
     setLoading(true);
-    if (!email || !password) {
+    if (!email.trim() || !password.trim()) {
       toast({
-        title: "Please Fill all the Feilds",
+        title: "Please fill all the fields",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (email.length < 3 || password.length < 3) {
+      toast({
+        title: "Please enter a valid email and password",
         status: "warning",
         duration: 5000,
         isClosable: true,
@@ -51,8 +65,10 @@ const Login = () => {
         isClosable: true,
         position: "bottom",
       });
+      setUser(data);
       localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
+
       history.push("/chats");
     } catch (error) {
       console.log(error);

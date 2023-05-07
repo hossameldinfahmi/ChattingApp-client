@@ -9,11 +9,16 @@ import {
   Button,
   InputRightElement,
   InputGroup,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
+import { ChatState } from "../../Context/ChatProvider";
+
+import "./signup.css";
 
 function Signup() {
   const toast = useToast();
+  const { setUser } = ChatState();
 
   const [show, setShow] = useState(false);
   const [name, setName] = useState("");
@@ -21,6 +26,10 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [pic, setPic] = useState();
   const [loading, setLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [picError, setPicError] = useState("");
   const history = useHistory();
 
   const handleShowPassword = () => {
@@ -29,69 +38,98 @@ function Signup() {
 
   const postImage = (pic) => {
     setLoading(true);
-    if (pic === undefined) {
-      toast({
-        title: "Please Fill all the Feilds",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom",
-      });
+
+    if (!pic) {
+      setPicError("Please select an image.");
       setLoading(false);
-      history.push("/chats");
       return;
     }
 
-    if (pic.type === "image/jpeg" || pic.type === "image/png") {
-      const data = new FormData();
-      data.append("file", pic);
-      data.append("upload_preset", "jlyqolzq");
-      data.append("cloud_name", "dlkayagta");
-      fetch(
-        "https://api.cloudinary.com/v1_1/dlkayagta/image/upload",
-
-        {
-          method: "POST",
-          body: data,
-        }
-      )
-        .then((res) => {
-          console.log(res);
-          setLoading(false);
-          return res.json();
-        })
-        .then((data) => {
-          setPic(data.url.toString());
-          setLoading(false);
-        });
-    } else {
-      toast({
-        title: "Account created.",
-        description: "We've created your account for you.",
-        status: "success",
-        duration: 9000,
-        isClosable: true,
-      });
+    if (pic.size > 1 * 1024 * 1024) {
+      setPicError(
+        "Image size is too large. Please select an image that is smaller than 1MB."
+      );
       setLoading(false);
+      return;
     }
+
+    if (pic.type !== "image/jpeg" && pic.type !== "image/png") {
+      setPicError("Please select a valid image file (JPEG or PNG).");
+      setLoading(false);
+      return;
+    }
+
+    const data = new FormData();
+    data.append("file", pic);
+    data.append("upload_preset", "jlyqolzq");
+    data.append("cloud_name", "dlkayagta");
+    fetch("https://api.cloudinary.com/v1_1/dlkayagta/image/upload", {
+      method: "POST",
+      body: data,
+    })
+      .then((res) => {
+        setLoading(false);
+        return res.json();
+      })
+      .then((data) => {
+        setPic(data.url.toString());
+        setLoading(false);
+        toast({
+          title: "Image uploaded successfully",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      });
   };
 
   const handleSubmit = async (e) => {
-    console.log(pic);
-    setLoading(true);
-    if (!name || !email || !password) {
-      toast({
-        title: "Please Fill all the Feilds",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom",
-      });
-      setLoading(false);
+    e.preventDefault();
+
+    // Reset error state variables
+    setNameError("");
+    setEmailError("");
+    setPasswordError("");
+    setPicError("");
+
+    // Input validation
+    if (!name.trim()) {
+      setNameError("Please enter your name.");
       return;
     }
 
-    console.log(name, email, password, pic);
+    if (pic.size > 1 * 1024 * 1024) {
+      setPicError(
+        "Image size is too large. Please select an image that is smaller than 1MB."
+      );
+      setLoading(false);
+      return;
+    }
+    if (!email.trim()) {
+      setEmailError("Please enter your email.");
+      return;
+    }
+
+    if (name.length < 3) {
+      setNameError("Name must be at least 3 characters long.");
+      return;
+    }
+
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 3) {
+      setPasswordError("Password must be at least 3 characters long.");
+      return;
+    }
+
+    if (!password.trim()) {
+      setPasswordError("Please enter a password.");
+      return;
+    }
 
     try {
       const config = {
@@ -105,7 +143,6 @@ function Signup() {
         { name, email, password, pic },
         config
       );
-      console.log(data);
       toast({
         title: "Registration Successful",
         status: "success",
@@ -113,36 +150,53 @@ function Signup() {
         isClosable: true,
         position: "bottom",
       });
+      // Clear input fields
+      setName("");
+      setEmail("");
+      setPassword("");
+      setPic("");
 
-      localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
-      history.push("/chat");
-    } catch (e) {
-      console.log(e);
+      history.push("/");
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      toast({
+        title: "Registration Failed",
+        description: error.response.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
     }
   };
 
   return (
     <VStack spacing="5px">
-      <FormControl id="first-name" isRequired>
+      <FormControl id="first-name" isRequired isInvalid={nameError}>
         <FormLabel>Name</FormLabel>
         <Input
           placeholder="Enter Your Name"
+          value={name}
           onChange={(e) => {
             setName(e.target.value);
           }}
         />
+        <FormErrorMessage>{nameError}</FormErrorMessage>
       </FormControl>
-      <FormControl id="email" isRequired>
+      <FormControl id="email" isRequired isInvalid={emailError}>
         <FormLabel>Email</FormLabel>
         <Input
           placeholder="Enter Email"
           onChange={(e) => setEmail(e.target.value)}
           onFocus={(e) => {}}
           onBlur={(e) => {}}
+          value={email}
         />
+        <FormErrorMessage>{emailError}</FormErrorMessage>
       </FormControl>
-      <FormControl id="password" isRequired>
+      <FormControl id="password" isRequired isInvalid={passwordError}>
         <FormLabel>Password</FormLabel>
         <InputGroup>
           <Input
@@ -150,19 +204,13 @@ function Signup() {
             placeholder="Enter Password"
             onChange={(e) => setPassword(e.target.value)}
             required
+            value={password}
           />
-          <InputRightElement>
-            <Button
-              colorScheme="gray"
-              size="sm"
-              onClick={() => handleShowPassword()}
-            >
-              {show ? "Hide" : "Show"}
-            </Button>
-          </InputRightElement>
+          <InputRightElement></InputRightElement>
         </InputGroup>
+        <FormErrorMessage>{passwordError}</FormErrorMessage>
       </FormControl>
-      <FormControl id="image">
+      <FormControl id="image" isInvalid={picError}>
         <FormLabel>Image</FormLabel>
         <Input
           type="file"
@@ -173,8 +221,10 @@ function Signup() {
             postImage(file);
           }}
         />
+        <FormErrorMessage>{picError}</FormErrorMessage>
       </FormControl>
       <Button
+        className="singupBTN"
         colorScheme="blue"
         width="100%"
         color="white"
