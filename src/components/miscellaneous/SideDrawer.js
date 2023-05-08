@@ -165,6 +165,24 @@ function SideDrawer() {
                 count={notification.length}
                 effect={Effect.SCALE}
               /> */}
+              <div
+                className="counter"
+                style={{
+                  backgroundColor: "red",
+                  borderRadius: "50%",
+                  color: "white",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "15px",
+                  width: "15px",
+                  fontSize: "10px",
+                  zIndex: "3443",
+                  position: "absolute",
+                }}
+              >
+                {notification.length}
+              </div>{" "}
               <BellIcon fontSize="2xl" m={1} />
             </MenuButton>
             <MenuList pl={2}>
