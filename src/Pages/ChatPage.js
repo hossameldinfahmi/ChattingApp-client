@@ -17,7 +17,7 @@ function ChatPage() {
     const fetchChats = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:3000/api/chats/${user._id}`
+          `https://topson-messenger.onrender.com/api/chats/${user._id}`
         );
         setChats(data);
       } catch (error) {

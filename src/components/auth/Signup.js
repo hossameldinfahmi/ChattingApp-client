@@ -139,7 +139,7 @@ function Signup() {
       };
 
       const data = await axios.post(
-        "http://localhost:3000/api/user",
+        "https://topson-messenger.onrender.com/api/user",
         { name, email, password, pic },
         config
       );

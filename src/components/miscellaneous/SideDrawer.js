@@ -70,7 +70,7 @@ function SideDrawer() {
       };
 
       const { data } = await axios.get(
-        `http://localhost:3000/api/user?search=${search}`,
+        `https://topson-messenger.onrender.com/api/user?search=${search}`,
         config
       );
       console.log(data);
@@ -99,7 +99,7 @@ function SideDrawer() {
         },
       };
       const { data } = await axios.post(
-        `http://localhost:3000/api/chat`,
+        `https://topson-messenger.onrender.com/api/chat`,
         { userId },
         config
       );

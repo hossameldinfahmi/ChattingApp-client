@@ -26,7 +26,7 @@ const MyChats = ({ fetchAgain }) => {
       };
 
       const { data } = await axios.get(
-        "http://localhost:3000/api/chat",
+        "https://topson-messenger.onrender.com/api/chat",
         config
       );
       console.log(data);
